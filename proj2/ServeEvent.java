@@ -24,10 +24,13 @@ public class ServeEvent extends Event {
                                                       false,
                                                       nextAvailableTime,
                                                       customer);
-                shop.addBusyServer(updatedServer);
+
+                shop.addBusyServer(updatedServer, customer);
+                
                 DoneEvent newDE = new DoneEvent(customer,
                                                 nextAvailableTime,
                                                 linkedServerID);
+                
                 return Pair.of(shop.replace(updatedServer), newDE);
               });
         this.customer       = customer;

@@ -49,4 +49,21 @@ public class Customer {
     public String toString() {
         return String.format("%d arrives at %.3f", this.customerID, this.arrivalTime);
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other instanceof Customer) {
+            Customer otherCustomer = (Customer)other;
+            return this.getID() == otherCustomer.getID();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getID();
+    }
 }

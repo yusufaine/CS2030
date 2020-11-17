@@ -27,7 +27,8 @@ public class ArriveEvent extends Event {
 
 
               //if (queue <= maxQueueSize) {}
-              Optional<Server> noWaitingServer = shop.find(y -> shop.isBusy(y));
+              Optional<Server> noWaitingServer = shop.find(y -> shop.isBusy(y) &&
+                                                           !shop.hasQueue(y));
               if (noWaitingServer.isPresent()) {
                   Server oldServer     = noWaitingServer.get();
                   int linkedServerID   = oldServer.getID();

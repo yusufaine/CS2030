@@ -73,22 +73,37 @@ public class Shop {
 
     public void addBusyServer(Server server, Customer customer) {
         waitingList.add(customer);
+
+
         serverMap.put(server, waitingList);
     }
 
-    public void removeBusyServer(Server server) {
-        busyServers.remove(server);
+    public void removeCustomer(Server server, Customer customer) {
+
+        waitingList.remove(customer);
+
+        if (waitingList.size() == 0) {
+            serverMap.remove(server);
+        } else {
+            serverMap.put(server, waitingList);
+        }
     }
 
     public boolean isBusy(Server server) {
-        return this.busyServers.contains(server);
+        if (serverMap.containsKey(server)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public List<Server> getHasWaiting() {
-        return this.hasWaiting;
+    public boolean hasQueue(Server server) {
+        if (serverMap.get(server).size() == 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
-
-    public void addHasWaiting(Server)
 
     @Override
     public String toString() {

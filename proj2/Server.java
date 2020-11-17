@@ -126,6 +126,11 @@ public class Server {
             return false;
         }
     }
+
+    @Override
+    public int hashCode() {
+        return this.getID();
+    }
 }
 
 

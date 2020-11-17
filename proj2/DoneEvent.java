@@ -19,7 +19,8 @@ public class DoneEvent extends Event {
                                                       oldServer.getAvailableTime(),
                                                       oldServer.getWaitingCustomer());
 
-                    shop.removeBusyServer(updatedServer);
+                    shop.removeCustomer(updatedServer, customer);
+                    
                     return Pair.of(shop.replace(updatedServer), 
                                    new DoneEvent(customer,
                                                  updatedServer.getAvailableTime(),
@@ -27,7 +28,8 @@ public class DoneEvent extends Event {
                 } else {
                     Server updatedServer = new Server(oldServer.getID());
 
-                    shop.removeBusyServer(updatedServer);
+                    shop.removeCustomer(updatedServer, customer);
+                                        
                     return Pair.of(shop.replace(updatedServer), 
                                    new DoneEvent(customer,
                                                  updatedServer.getAvailableTime(),
