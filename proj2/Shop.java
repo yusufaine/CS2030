@@ -72,18 +72,20 @@ public class Shop {
     }
 
     public void addBusyServer(Server server, Customer customer) {
+        
+        // System.out.println("  Server " + server.getID() + " added!");
+        // System.out.println("Customer " + customer.getID() + " added!");
         waitingList.add(customer);
-
-
         serverMap.put(server, waitingList);
     }
 
     public void removeCustomer(Server server, Customer customer) {
 
-        waitingList.remove(customer);
+        this.serverMap.get(server).remove(customer);
 
-        if (waitingList.size() == 0) {
+        if (this.serverMap.get(server).isEmpty()) {
             serverMap.remove(server);
+            // System.out.println("Server " + server.getID() + " removed!");
         } else {
             serverMap.put(server, waitingList);
         }
@@ -98,10 +100,10 @@ public class Shop {
     }
 
     public boolean hasQueue(Server server) {
-        if (serverMap.get(server).size() == 0) {
-            return false;
-        } else {
+        if (serverMap.get(server).size() != 0) {
             return true;
+        } else {
+            return false;
         }
     }
 

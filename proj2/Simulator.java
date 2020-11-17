@@ -59,8 +59,8 @@ public class Simulator {
         while (eventPQ.peek() != null) {
 
             Event pollEvent = this.eventPQ.poll();
-            System.out.println(pollEvent);
-            // printPQ.offer(pollEvent);
+            System.out.println(this.shop.getServerMap());
+            // System.out.println(pollEvent);
 
             if (pollEvent instanceof ArriveEvent) {
                 

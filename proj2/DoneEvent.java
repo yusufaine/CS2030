@@ -20,7 +20,8 @@ public class DoneEvent extends Event {
                                                       oldServer.getWaitingCustomer());
 
                     shop.removeCustomer(updatedServer, customer);
-                    
+                    // System.out.println(String.format("[DEBUG] Server %d passed in",
+                    //                                  updatedServer.getID()));
                     return Pair.of(shop.replace(updatedServer), 
                                    new DoneEvent(customer,
                                                  updatedServer.getAvailableTime(),
@@ -29,7 +30,9 @@ public class DoneEvent extends Event {
                     Server updatedServer = new Server(oldServer.getID());
 
                     shop.removeCustomer(updatedServer, customer);
-                                        
+                    // System.out.println(String.format("[DEBUG] Server %d passed in",
+                    //                                  updatedServer.getID()));
+
                     return Pair.of(shop.replace(updatedServer), 
                                    new DoneEvent(customer,
                                                  updatedServer.getAvailableTime(),
