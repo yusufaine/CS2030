@@ -19,24 +19,19 @@ public class DoneEvent extends Event {
                                                       oldServer.getAvailableTime(),
                                                       oldServer.getWaitingCustomer());
 
-                    shop.removeCustomer(updatedServer, customer);
-                    // System.out.println(String.format("[DEBUG] Server %d passed in",
-                    //                                  updatedServer.getID()));
-                    return Pair.of(shop.replace(updatedServer), 
-                                   new DoneEvent(customer,
-                                                 updatedServer.getAvailableTime(),
-                                                 linkedServerID));
+                    DoneEvent newDE = new DoneEvent(customer, 
+                                                    updatedServer.getAvailableTime(),
+                                                    linkedServerID);
+
+                    return Pair.of(shop.replace(updatedServer), newDE);
                 } else {
                     Server updatedServer = new Server(oldServer.getID());
 
-                    shop.removeCustomer(updatedServer, customer);
-                    // System.out.println(String.format("[DEBUG] Server %d passed in",
-                    //                                  updatedServer.getID()));
+                    DoneEvent newDE = new DoneEvent(customer, 
+                                                    updatedServer.getAvailableTime(),
+                                                    linkedServerID);
 
-                    return Pair.of(shop.replace(updatedServer), 
-                                   new DoneEvent(customer,
-                                                 updatedServer.getAvailableTime(),
-                                                 linkedServerID));
+                    return Pair.of(shop.replace(updatedServer), newDE);
                 }
             });
         this.customer       = customer;

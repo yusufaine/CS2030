@@ -63,46 +63,6 @@ public class Shop {
         return new Shop(tmpList);
     }
 
-    public Map<Server, List<Customer>> getServerMap() {
-        return this.serverMap;
-    }
-
-    public void addBusyServer(Server server, Customer customer) {
-        
-        // System.out.println("  Server " + server.getID() + " added!");
-        // System.out.println("Customer " + customer.getID() + " added!");
-        serverMap.put(server, List.of(customer));
-    }
-
-    public void removeCustomer(Server server, Customer customer) {
-
-        List<Customer> tmpList = new ArrayList<>();
-        tmpList.addAll(this.serverMap.get(server));
-        tmpList.remove(customer);
-
-        if (tmpList.isEmpty()) {
-            serverMap.remove(server);
-        } else {
-            serverMap.put(server, tmpList);
-        }
-    }
-
-    public boolean isBusy(Server server) {
-        if (serverMap.containsKey(server)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean hasQueue(Server server) {
-        if (this.serverMap.get(server).isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     @Override
     public String toString() {
         return this.getServerList().toString();

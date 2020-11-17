@@ -20,13 +20,11 @@ public class ServeEvent extends Event {
                 double servingTime = customer.getServiceTime().get();
                 double nextAvailableTime = eventTime + servingTime;
                 Server updatedServer     = new Server(oldServer.getID(),
-                                                      oldServer.getAvailability(),
+                                                      false,
                                                       false,
                                                       nextAvailableTime,
                                                       customer);
 
-                shop.addBusyServer(updatedServer, customer);
-                
                 DoneEvent newDE = new DoneEvent(customer,
                                                 nextAvailableTime,
                                                 linkedServerID);
@@ -36,7 +34,6 @@ public class ServeEvent extends Event {
         this.customer       = customer;
         this.eventTime      = eventTime;
         this.linkedServerID = linkedServerID;
-        super.addBusyServer(linkedServerID);
     }
 
     public String toString() {

@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public class Simulator {
     private final ArrayList<Customer> customerList;
     private final PriorityQueue<Event> eventPQ;
-    // private final PriorityQueue<Event> printPQ;
+    private final PriorityQueue<Event> printPQ;
     private final Shop shop;
     private final Supplier<Double> serviceTime;
 
@@ -20,7 +20,7 @@ public class Simulator {
 
         this.customerList = createCustomerList(customerArrivals, serviceTime);
         this.eventPQ      = new PriorityQueue<>(new EventComparator());
-        // this.printPQ      = new PriorityQueue<>(new EventComparator());
+        this.printPQ      = new PriorityQueue<>(new EventComparator());
         this.shop         = new Shop(serverCount);
         this.serviceTime  = serviceTime;
     }
@@ -50,48 +50,79 @@ public class Simulator {
     }
 
     public void run() {
-        int totalCustomer = 0;
-        int customersLost = 0;
+        int totalCustomer    = 0;
+        int customersLost    = 0;
+        int customersServed  = 0;
         double totalWaitTime = 0.0;
+        Shop updatedShop     = this.shop;
 
         populateEventPQ();
 
         while (eventPQ.peek() != null) {
 
             Event pollEvent = this.eventPQ.poll();
-            // System.out.println(this.shop.getServerMap());
-            System.out.println(pollEvent);
+            printPQ.offer(pollEvent);
 
             if (pollEvent instanceof ArriveEvent) {
                 
                 totalCustomer++;
 
-                Pair<Shop,Event> result = pollEvent.execute(this.shop); 
+                Pair<Shop,Event> result = pollEvent.execute(updatedShop); 
+
+                updatedShop = result.first();
                 eventPQ.offer(result.second());
 
             } else if (pollEvent instanceof WaitEvent) {
 
-                Pair<Shop,Event> result = pollEvent.execute(this.shop);
+                Pair<Shop,Event> result = pollEvent.execute(updatedShop);
+
+                updatedShop = result.first();
                 eventPQ.offer(result.second());
 
             } else if (pollEvent instanceof ServeEvent) {
                 
+                customersServed++;
+
                 totalWaitTime += pollEvent.getEventTime() - 
                                  pollEvent.getCustomer().getArrivalTime();
 
-                Pair<Shop,Event> result = pollEvent.execute(this.shop);
+                Pair<Shop,Event> result = pollEvent.execute(updatedShop);
+
+                updatedShop = result.first();
                 eventPQ.offer(result.second());
 
             } else if (pollEvent instanceof DoneEvent) {
-                Pair<Shop,Event> result = pollEvent.execute(this.shop);
+
+                Pair<Shop,Event> result = pollEvent.execute(updatedShop);
+
+                updatedShop = result.first();
+
             } else if (pollEvent instanceof LeaveEvent) {
                 customersLost++;
             }
         }
+        printEvents(printPQ);
+        printStats(totalWaitTime, customersServed, customersLost);
+    }
 
+    public void printEvents(PriorityQueue<Event> printPQ) {
+        for (Event e : printPQ) {
+            System.out.println(e);
+        }
+    }
+
+    public void printStats(double totalTime, int served, int lost) {
+
+        double averageTime = 0;
+
+        if (served == 0) {
+            averageTime = 0;
+        } else {
+            averageTime = totalTime / served;
+        }
         System.out.println(String.format("[%.3f %d %d]", 
-                                 totalWaitTime / (totalCustomer - customersLost),
-                                 totalCustomer - customersLost,
-                                 customersLost));
+                                         averageTime,
+                                         served,
+                                         lost));
     }
 }

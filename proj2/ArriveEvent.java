@@ -9,12 +9,12 @@ public class ArriveEvent extends Event {
               customer.getArrivalTime(),
               shop -> {
               
-              Optional<Server> availableServer = shop.find(y -> y.isAvailable() &&
-                                                           !shop.isBusy(y));
+              Optional<Server> availableServer = shop.find(y -> y.isAvailable());
+
               if (availableServer.isPresent()) {
                   
-                  Server oldServer     = availableServer.get();
-                  int linkedServerID   = oldServer.getID();
+                  Server oldServer   = availableServer.get();
+                  int linkedServerID = oldServer.getID();
 
                   ServeEvent newSE = new ServeEvent(customer,
                                                     customer.getArrivalTime(),
@@ -23,8 +23,8 @@ public class ArriveEvent extends Event {
                   return Pair.of(shop, newSE);
               }
 
-              Optional<Server> noWaitingServer = shop.find(y -> shop.isBusy(y) &&
-                                                           shop.hasQueue(y));
+              Optional<Server> noWaitingServer = shop.find(y -> !y.isAvailable() && 
+                                                           !y.hasWaitingCustomer());
               if (noWaitingServer.isPresent()) {
                   Server oldServer     = noWaitingServer.get();
                   int linkedServerID   = oldServer.getID();
@@ -32,6 +32,7 @@ public class ArriveEvent extends Event {
                   WaitEvent newWE = new WaitEvent(customer,
                                                   customer.getArrivalTime(),
                                                   linkedServerID);
+
 
                   return Pair.of(shop, newWE);
               }

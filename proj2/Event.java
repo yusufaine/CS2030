@@ -45,25 +45,6 @@ public abstract class Event {
         return this.linkedServerID;
     }
 
-    public void addBusyServer(int linkedServerID) {
-        busyServer.add(linkedServerID);
-    }
-
-    public void removeBusyServer(int linkedServerID) {
-        int busyIndex = busyServer.indexOf(linkedServerID);
-        if (busyIndex >= 0) {
-            busyServer.remove(busyIndex);            
-        }
-    }
-
-    public boolean checkBusyServer(int linkedServerID) {
-        if (busyServer.indexOf(linkedServerID) != -1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public final Pair<Shop, Event> execute(Shop shop) {
         Pair<Shop,Event> result = this.execFunc.apply(shop);
         return result;
