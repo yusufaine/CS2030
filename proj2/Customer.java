@@ -1,0 +1,52 @@
+package cs2030.simulator;
+
+import java.util.function.Supplier;
+
+public class Customer {
+
+    private final int customerID;
+    private final double arrivalTime;
+    private final Supplier<Double> serviceTime;
+
+    /**
+     * Constructs a new instance of a customer.
+     *
+     * @param      id    Identifier of the customer.
+     * @param      time  Which the customer arrives.
+     */
+
+    public Customer(int id, double arrivalTime, Supplier<Double> serviceTime) {
+        this.customerID  = id;
+        this.arrivalTime = arrivalTime;
+        this.serviceTime = serviceTime;
+    }
+
+    public Customer(int id, double arrivalTime) {
+        this.customerID  = id;
+        this.arrivalTime = arrivalTime;
+        Supplier<Double> defaultTime = () -> 1.0;
+        this.serviceTime = defaultTime;
+    }
+
+    public int getID() {
+        return this.customerID;
+    }
+
+    public double getArrivalTime() {
+        return this.arrivalTime;
+    }
+
+    public Supplier<Double> getServiceTime() {
+        return this.serviceTime;
+    }
+
+    /**
+     * Returns a string representation of the Customer object.
+     *
+     * @return     String that states the specific customer arriving at what time.
+     */
+    @Override
+    public String toString() {
+        return String.format("%d arrives at %.3f", this.customerID, this.arrivalTime);
+    }
+}
