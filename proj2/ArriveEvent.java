@@ -4,8 +4,6 @@ import java.util.Optional;
 
 public class ArriveEvent extends Event {
 
-    private final Customer customer;
-
     ArriveEvent(Customer customer) {
         super(customer, 
               customer.getArrivalTime(),
@@ -25,10 +23,8 @@ public class ArriveEvent extends Event {
                   return Pair.of(shop, newSE);
               }
 
-
-              //if (queue <= maxQueueSize) {}
               Optional<Server> noWaitingServer = shop.find(y -> shop.isBusy(y) &&
-                                                           !shop.hasQueue(y));
+                                                           shop.hasQueue(y));
               if (noWaitingServer.isPresent()) {
                   Server oldServer     = noWaitingServer.get();
                   int linkedServerID   = oldServer.getID();
@@ -40,13 +36,10 @@ public class ArriveEvent extends Event {
                   return Pair.of(shop, newWE);
               }
 
-              //else{}
               LeaveEvent newLE = new LeaveEvent(customer,
                                                 customer.getArrivalTime());
               return Pair.of(shop, newLE);
               });
-
-        this.customer = customer;
     }
 
     public String toString() {

@@ -63,10 +63,6 @@ public class Shop {
         return new Shop(tmpList);
     }
 
-    public List<Customer> getWaitingList() {
-        return this.waitingList;
-    }
-
     public Map<Server, List<Customer>> getServerMap() {
         return this.serverMap;
     }
@@ -75,19 +71,19 @@ public class Shop {
         
         // System.out.println("  Server " + server.getID() + " added!");
         // System.out.println("Customer " + customer.getID() + " added!");
-        waitingList.add(customer);
-        serverMap.put(server, waitingList);
+        serverMap.put(server, List.of(customer));
     }
 
     public void removeCustomer(Server server, Customer customer) {
 
-        this.serverMap.get(server).remove(customer);
+        List<Customer> tmpList = new ArrayList<>();
+        tmpList.addAll(this.serverMap.get(server));
+        tmpList.remove(customer);
 
-        if (this.serverMap.get(server).isEmpty()) {
+        if (tmpList.isEmpty()) {
             serverMap.remove(server);
-            // System.out.println("Server " + server.getID() + " removed!");
         } else {
-            serverMap.put(server, waitingList);
+            serverMap.put(server, tmpList);
         }
     }
 
@@ -100,10 +96,10 @@ public class Shop {
     }
 
     public boolean hasQueue(Server server) {
-        if (serverMap.get(server).size() != 0) {
-            return true;
-        } else {
+        if (this.serverMap.get(server).isEmpty()) {
             return false;
+        } else {
+            return true;
         }
     }
 
