@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public class ArriveEvent extends Event {
 
-    ArriveEvent(Customer customer) {
+    ArriveEvent(Customer customer, int maxQueue) {
         super(customer, 
               customer.getArrivalTime(),
               shop -> {
@@ -13,8 +13,7 @@ public class ArriveEvent extends Event {
 
               if (availableServer.isPresent()) {
                   
-                  Server oldServer   = availableServer.get();
-                  int linkedServerID = oldServer.getID();
+                  int linkedServerID = availableServer.get().getID();
 
                   ServeEvent newSE = new ServeEvent(customer,
                                                     customer.getArrivalTime(),
@@ -23,14 +22,16 @@ public class ArriveEvent extends Event {
                   return Pair.of(shop, newSE);
               }
 
-              Optional<Server> noWaitingServer = shop.find(y -> !y.isAvailable() && 
-                                                           !y.hasWaitingCustomer());
-              if (noWaitingServer.isPresent()) {
-                  Server oldServer     = noWaitingServer.get();
-                  int linkedServerID   = oldServer.getID();
+              // returns first server that is available and does not have a max q
+              Optional<Server> busyServer = shop.find(y -> !y.isAvailable() && 
+                                                      y.getQueueSize() != maxQueue);
+              if (busyServer.isPresent()) {
 
-                  WaitEvent newWE = new WaitEvent(customer,
-                                                  customer.getArrivalTime(),
+                  int linkedServerID       = busyServer.get().getID();
+                  Customer waitingCustomer = customer;
+
+                  WaitEvent newWE = new WaitEvent(waitingCustomer,
+                                                  waitingCustomer.getArrivalTime(),
                                                   linkedServerID);
 
 

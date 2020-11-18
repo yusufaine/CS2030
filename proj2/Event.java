@@ -2,7 +2,6 @@ package cs2030.simulator;
 
 import java.util.function.Function;
 import java.util.ArrayList;
-// import java.util.function.Supplier;
 
 public abstract class Event {
 
@@ -10,7 +9,7 @@ public abstract class Event {
     private final double eventTime;
     private final int linkedServerID;
     private final Function<Shop, Pair<Shop,Event>> execFunc;
-    private final ArrayList<Integer> busyServer = new ArrayList<>();
+    // private final int maxQueue;
 
     Event(Customer customer,
           double eventTime,
@@ -19,8 +18,9 @@ public abstract class Event {
         
         this.customer    = customer;
         this.eventTime   = eventTime;
-        this.linkedServerID = linkedServerID;
         this.execFunc    = execFunc;
+        // this.maxQueue    = 1;
+        this.linkedServerID = linkedServerID;
     }
 
     Event(Customer customer,
@@ -29,8 +29,9 @@ public abstract class Event {
 
         this.customer    = customer;
         this.eventTime   = eventTime;
-        this.linkedServerID = -1;
         this.execFunc    = execFunc;
+        // this.maxQueue    = maxQueue;
+        this.linkedServerID = -1;
     }
 
     public Customer getCustomer() {

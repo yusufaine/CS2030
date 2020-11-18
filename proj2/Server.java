@@ -1,6 +1,7 @@
 package cs2030.simulator;
 
-import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.LinkedList;
 
 public class Server {
 
@@ -9,7 +10,7 @@ public class Server {
     private final boolean waitingCustomer;
     private final double availableTime;
     private final Customer toServe;
-    private final PriorityQueue<Customer> customerQueue = new PriorityQueue<>();
+    private final Queue<Customer> customerQueue = new LinkedList<>();
 
     /**
      * Constructs a new instance of a server.
@@ -72,7 +73,11 @@ public class Server {
     }
 
     public boolean hasWaitingCustomer() {
-        return this.waitingCustomer;
+        if (this.getQueueSize() >= 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public double getAvailableTime() {
@@ -87,8 +92,38 @@ public class Server {
         return this.getAvailability();
     }
 
-    public PriorityQueue<Customer> getCustomerQueue() {
+    public Queue<Customer> getQueue() {
         return this.customerQueue;
+    }
+
+    public int getQueueSize() {
+        return this.customerQueue.size();
+    }
+
+    public boolean hasQueue() {
+        if (this.getQueueSize() == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public Customer peekNextCustomer() {
+        return this.customerQueue.peek();
+    }
+
+    public Customer pollNextCustomer() {
+        return this.customerQueue.poll();
+    }
+
+    public void addToQueue(Customer customer) {
+
+        this.customerQueue.offer(customer);
+    }
+
+    public void copyQueue(Queue<Customer> oldQueue) {
+
+        this.customerQueue.addAll(oldQueue);
     }
 
     /**

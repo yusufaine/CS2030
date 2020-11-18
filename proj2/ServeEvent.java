@@ -1,29 +1,40 @@
 package cs2030.simulator;
 
-import cs2030.simulator.RNGImpl;
-
 public class ServeEvent extends Event {
 
     private final Customer  customer;
     private final double   eventTime;
     private final int linkedServerID;
 
-    ServeEvent(Customer customer, 
-               double eventTime, 
-               int linkedServerID) {
+    ServeEvent(Customer customer, double eventTime, int linkedServerID) {
 
         super(customer, 
               eventTime, 
               linkedServerID,
               shop -> {
-                Server oldServer   = shop.getServerList().get(linkedServerID - 1);
+                Server oldServer   = shop.find(x -> x.getID == linkedServerID).get();
                 double servingTime = customer.getServiceTime().get();
                 double nextAvailableTime = eventTime + servingTime;
                 Server updatedServer     = new Server(oldServer.getID(),
                                                       false,
                                                       false,
                                                       nextAvailableTime,
-                                                      customer);
+                                                      oldServer.peekNextCustomer());
+
+                
+
+                updatedServer.copyQueue(oldServer.getQueue());
+                // updatedServer.addToQueue(waitingCustomer);
+
+                // if (!oldServer.getQueue().isEmpty() && 
+                //     !updatedServer.getQueue().isEmpty()){
+                    
+                //     System.out.println("@ServeEvent");                
+                //     System.out.println("OLD QUEUE " + oldServer.getQueue());
+                //     System.out.println("NEW QUEUE " + updatedServer.getQueue());
+                //     System.out.println("Now serving: " + customer.getID());
+                // }
+                // System.out.println("Now serving customer: " + customer.getID());
 
                 DoneEvent newDE = new DoneEvent(customer,
                                                 nextAvailableTime,

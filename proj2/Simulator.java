@@ -13,16 +13,19 @@ public class Simulator {
     private final PriorityQueue<Event> printPQ;
     private final Shop shop;
     private final Supplier<Double> serviceTime;
+    private final int maxQueue;
 
     public Simulator(ArrayList<Double> customerArrivals, 
                      int serverCount, 
-                     Supplier<Double> serviceTime) {
+                     Supplier<Double> serviceTime,
+                     int maxQueue) {
 
         this.customerList = createCustomerList(customerArrivals, serviceTime);
         this.eventPQ      = new PriorityQueue<>(new EventComparator());
         this.printPQ      = new PriorityQueue<>(new EventComparator());
         this.shop         = new Shop(serverCount);
         this.serviceTime  = serviceTime;
+        this.maxQueue     = maxQueue;
     }
 
     public ArrayList<Customer> createCustomerList(ArrayList<Double> customerArrivals,
@@ -44,7 +47,7 @@ public class Simulator {
 
     public void populateEventPQ() {
         for (Customer customer : customerList) {
-            ArriveEvent arriveEvent = new ArriveEvent(customer);
+            ArriveEvent arriveEvent = new ArriveEvent(customer, this.maxQueue);
             eventPQ.offer(arriveEvent);
         }
     }
