@@ -12,35 +12,65 @@ public class ServeEvent extends Event {
               eventTime, 
               linkedServerID,
               shop -> {
-                Server oldServer   = shop.find(x -> x.getID == linkedServerID).get();
-                double servingTime = customer.getServiceTime().get();
-                double nextAvailableTime = eventTime + servingTime;
-                Server updatedServer     = new Server(oldServer.getID(),
-                                                      false,
-                                                      false,
-                                                      nextAvailableTime,
-                                                      oldServer.peekNextCustomer());
+                Server oldServer   = shop.find(x -> x.getID() == linkedServerID).get();
+                double servingTime = customer.getServiceTime();
 
+                System.out.println("@ServeEvent");
                 
+                if (oldServer.hasQueue() == false) {
+                    double nextAvailableTime = eventTime + servingTime;
 
-                updatedServer.copyQueue(oldServer.getQueue());
-                // updatedServer.addToQueue(waitingCustomer);
+                    Server updatedServer     = new Server(oldServer.getID(),
+                                                          false,
+                                                          false,
+                                                          nextAvailableTime,
+                                                          oldServer.getWaitingCustomer());
 
-                // if (!oldServer.getQueue().isEmpty() && 
-                //     !updatedServer.getQueue().isEmpty()){
-                    
-                //     System.out.println("@ServeEvent");                
-                //     System.out.println("OLD QUEUE " + oldServer.getQueue());
-                //     System.out.println("NEW QUEUE " + updatedServer.getQueue());
-                //     System.out.println("Now serving: " + customer.getID());
-                // }
-                // System.out.println("Now serving customer: " + customer.getID());
+                    updatedServer.copyQueue(oldServer.getQueue());
 
-                DoneEvent newDE = new DoneEvent(customer,
-                                                nextAvailableTime,
-                                                linkedServerID);
-                
-                return Pair.of(shop.replace(updatedServer), newDE);
+                    // if (updatedServer.hasQueue() && oldServer.hasQueue()) {
+                    //     System.out.println("@ServeEvent");
+                    //     System.out.println("Now serving: " + customer.getID());
+                    //     System.out.println("OLD QUEUE: " + oldServer.getQueue());
+                    //     System.out.println("NEW QUEUE: " + updatedServer.getQueue());
+                    //     System.out.println();
+                    // }
+                    System.out.println("No queue detected");
+                    System.out.println("Now serving  : " + customer.getID());
+                    System.out.println("Next customer: " + "NULL");
+                    System.out.println("Queue status : " + updatedServer.hasQueue());
+                    System.out.println("Queue size   : " + updatedServer.getQueueSize());
+                    System.out.println();
+
+                    DoneEvent newDE = new DoneEvent(customer,
+                                                    nextAvailableTime,
+                                                    linkedServerID);
+
+                    return Pair.of(shop.replace(updatedServer), newDE);
+                } else {
+                    double nextAvailableTime = eventTime + servingTime;
+                    Server updatedServer     = new Server(oldServer.getID(),
+                                                          false,
+                                                          false,
+                                                          nextAvailableTime,
+                                                          oldServer.pollNextCustomer());
+
+                    updatedServer.copyQueue(oldServer.getQueue());
+
+                    System.out.println("Queue detected");
+                    System.out.println("Now serving  : " + customer.getID());
+                    System.out.println("Next customer: " + updatedServer.getWaitingCustomer().getID());
+                    System.out.println("Queue status : " + updatedServer.hasQueue());
+                    System.out.println("Queue size   : " + updatedServer.getQueueSize());
+                    System.out.println();
+
+                    DoneEvent newDE = new DoneEvent(customer,
+                                                    nextAvailableTime,
+                                                    linkedServerID);
+
+                    return Pair.of(shop.replace(updatedServer), newDE);
+
+                }
               });
         this.customer       = customer;
         this.eventTime      = eventTime;
@@ -50,7 +80,7 @@ public class ServeEvent extends Event {
     public String toString() {
 
         return String.format("%.3f %d served by server %d", 
-                             super.getEventTime(),
+                             this.eventTime,
                              this.customer.getID(),
                              linkedServerID);
     }

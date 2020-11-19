@@ -7,28 +7,19 @@ public class DoneEvent extends Event {
     private final int linkedServerID;
 
     DoneEvent(Customer customer, double eventTime, int linkedServerID) {
-        
         super(customer, 
               eventTime,
               linkedServerID,
               shop -> {
                 Server oldServer = shop.getServerList().get(linkedServerID - 1);
-                Customer nextCustomer = oldServer.pollNextCustomer();
-                if (oldServer.hasWaitingCustomer()) {
+                if (oldServer.hasQueue()) {
                     Server updatedServer = new Server(oldServer.getID(),
                                                       false,
                                                       false,
                                                       oldServer.getAvailableTime(),
-                                                      nextCustomer);
+                                                      oldServer.getWaitingCustomer());
 
-                    // System.out.println("Old customer impl: " + oldServer
-                    //                    .getWaitingCustomer()
-                    //                    .getID());
-                    // System.out.println("New customer impl: " + nextCustomer.getID());
-
-                    System.out.println("@DoneEvent");                
-                    System.out.println("OLD QUEUE " + oldServer.getQueue());
-                    System.out.println("NEW QUEUE " + updatedServer.getQueue());
+                    updatedServer.copyQueue(oldServer.getQueue());
 
                     DoneEvent newDE = new DoneEvent(customer, 
                                                     updatedServer.getAvailableTime(),
@@ -41,15 +32,17 @@ public class DoneEvent extends Event {
                     DoneEvent newDE = new DoneEvent(customer, 
                                                     updatedServer.getAvailableTime(),
                                                     linkedServerID);
+                    
+                    updatedServer.copyQueue(oldServer.getQueue());
 
                     return Pair.of(shop.replace(updatedServer), newDE);
                 }
-            });        
-
+            });
         this.customer       = customer;
         this.eventTime      = eventTime;
         this.linkedServerID = linkedServerID;
     }
+
 
     public String toString() {
         

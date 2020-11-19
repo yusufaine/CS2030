@@ -7,6 +7,8 @@ public class Customer {
     private final int customerID;
     private final double arrivalTime;
     private final Supplier<Double> serviceTime;
+    private double computedServiceTime;
+    private boolean isComputed = false;
 
     /**
      * Constructs a new instance of a customer.
@@ -36,8 +38,13 @@ public class Customer {
         return this.arrivalTime;
     }
 
-    public Supplier<Double> getServiceTime() {
-        return this.serviceTime;
+    public double getServiceTime() {
+        
+        if (this.isComputed == false) {
+            this.isComputed = true;
+            this.computedServiceTime = this.serviceTime.get();
+        }
+        return this.computedServiceTime;
     }
 
     /**
@@ -64,6 +71,6 @@ public class Customer {
 
     @Override
     public int hashCode() {
-        return this.getID();
+        return this.customerID;
     }
 }
