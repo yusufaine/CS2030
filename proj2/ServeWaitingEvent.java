@@ -1,12 +1,12 @@
 package cs2030.simulator;
 
-public class ServeEvent extends Event {
+public class ServeWaitingEvent extends Event {
 
     private final Customer  customer;
     private final double   eventTime;
     private final int linkedServerID;
 
-    ServeEvent(Customer customer, double eventTime, int linkedServerID) {
+    ServeWaitingEvent(Customer customer, double eventTime, int linkedServerID) {
 
         super(customer, 
               eventTime, 
@@ -15,7 +15,10 @@ public class ServeEvent extends Event {
                 Server oldServer   = shop.find(x -> x.getID() == linkedServerID).get();
                 double servingTime = customer.getServiceTime();
                 double nextAvailableTime = eventTime + servingTime;
+
+                System.out.println("Queue before: " + oldServer.getQueue());
                 Customer nextCustomer = oldServer.pollNextCustomer();
+                System.out.println("Queue after : " + oldServer.getQueue());
 
                 Server updatedServer = new Server(oldServer.getID(),
                                                   false,

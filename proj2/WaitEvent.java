@@ -2,7 +2,7 @@ package cs2030.simulator;
 
 public class WaitEvent extends Event {
 
-    private final Customer customer;
+    private final Customer  customer;
     private final double   eventTime;
     private final int linkedServerID;
 
@@ -14,29 +14,16 @@ public class WaitEvent extends Event {
               shop -> {
                 Server oldServer = shop.find(x -> x.getID() == linkedServerID).get();
 
-                System.out.println("@WaitEvent"); 
-                System.out.println("Server ID: " + oldServer.getID());
-                System.out.println(String.format("Available @ %.3f", oldServer.getAvailableTime()));
-                System.out.println("Queue Status: " + oldServer.hasQueue());
-                System.out.println("OLD QUEUE " + oldServer.getQueue());
-
                 oldServer.addToQueue(customer);
-
-
 
                 Server updatedServer = new Server(oldServer.getID(),
                                                   false,
                                                   true,
-                                                  oldServer.getAvailableTime() + customer.getServiceTime(),
+                                                  oldServer.getAvailableTime(),
                                                   oldServer.peekNextCustomer());
 
-                updatedServer.copyQueue(oldServer.getQueue());
-
-                System.out.println("NEW QUEUE " + updatedServer.getQueue());
-                System.out.println("Customer added: " + customer.getID());
-                System.out.println(" Next customer: " + updatedServer.getWaitingCustomer().getID());
-                System.out.println(oldServer.hasQueue());
-                System.out.println();
+                updatedServer.copyQueue(oldServer);
+                shop.replace(updatedServer);
 
                 ServeEvent newSE = new ServeEvent(customer,
                                                   oldServer.getAvailableTime(),

@@ -12,12 +12,28 @@ public class Main {
 
     public static void main(String[] args) {
 
-        int seed          = Integer.parseInt(args[0]);
-        int serverCount   = Integer.parseInt(args[1]);
-        int maxQueue      = Integer.parseInt(args[2]);
-        int customerCount = Integer.parseInt(args[3]);
-        double lambda   = Double.parseDouble(args[4]);
-        double mu       = Double.parseDouble(args[5]);
+        int seed;
+        int serverCount;
+        int maxQueue;
+        int customerCount;
+        double lambda;
+        double mu;
+
+        if (args.length == 5) {
+            seed        = Integer.parseInt(args[0]);
+            serverCount = Integer.parseInt(args[1]);
+            maxQueue    = 1;
+            customerCount = Integer.parseInt(args[2]);
+            lambda      = Double.parseDouble(args[3]);
+            mu          = Double.parseDouble(args[4]);
+        } else {
+            seed        = Integer.parseInt(args[0]);
+            serverCount = Integer.parseInt(args[1]);
+            maxQueue    = Integer.parseInt(args[2]);
+            customerCount = Integer.parseInt(args[3]);
+            lambda      = Double.parseDouble(args[4]);
+            mu          = Double.parseDouble(args[5]);
+        }
 
         RNGImpl rng = new RNGImpl(seed, lambda, mu, 0);
 
@@ -36,6 +52,7 @@ public class Main {
                  });
 
         Supplier<Double> serviceTime = () -> rng.genServiceTime();
+
         Simulator sim = new Simulator(customerArrivals, 
                                       serverCount, 
                                       serviceTime, 

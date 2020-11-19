@@ -9,7 +9,6 @@ public abstract class Event {
     private final double eventTime;
     private final int linkedServerID;
     private final Function<Shop, Pair<Shop,Event>> execFunc;
-    // private final int maxQueue;
 
     Event(Customer customer,
           double eventTime,
@@ -19,7 +18,6 @@ public abstract class Event {
         this.customer    = customer;
         this.eventTime   = eventTime;
         this.execFunc    = execFunc;
-        // this.maxQueue    = 1;
         this.linkedServerID = linkedServerID;
     }
 
@@ -30,7 +28,6 @@ public abstract class Event {
         this.customer    = customer;
         this.eventTime   = eventTime;
         this.execFunc    = execFunc;
-        // this.maxQueue    = maxQueue;
         this.linkedServerID = -1;
     }
 
@@ -42,7 +39,7 @@ public abstract class Event {
         return this.eventTime;
     }
 
-    public int getlinkedServerID() {
+    public int getLinkedServerID() {
         return this.linkedServerID;
     }
 

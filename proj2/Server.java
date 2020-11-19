@@ -42,7 +42,11 @@ public class Server {
      * @param      waitingCustomer  Boolean representing if there is a waiting customer
      * @param      availableTime    Reflects when the server would be available
      */
-    public Server(int id, boolean available, boolean waitingCustomer, double availableTime) {
+    public Server(int id, 
+                  boolean available, 
+                  boolean waitingCustomer, 
+                  double availableTime) {
+
         this.serverID        = id;
         this.available       = available;
         this.waitingCustomer = waitingCustomer;
@@ -73,11 +77,7 @@ public class Server {
     }
 
     public boolean hasWaitingCustomer() {
-        if (this.getQueueSize() >= 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.waitingCustomer;
     }
 
     public double getAvailableTime() {
@@ -121,9 +121,10 @@ public class Server {
         this.customerQueue.offer(customer);
     }
 
-    public void copyQueue(Queue<Customer> oldQueue) {
+    public void copyQueue(Server oldServer) {
+        
+        this.customerQueue.addAll(oldServer.getQueue());
 
-        this.customerQueue.addAll(oldQueue);
     }
 
     /**

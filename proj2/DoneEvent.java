@@ -1,5 +1,7 @@
 package cs2030.simulator;
 
+import java.util.Optional;
+
 public class DoneEvent extends Event {
 
     private final Customer  customer;
@@ -11,29 +13,31 @@ public class DoneEvent extends Event {
               eventTime,
               linkedServerID,
               shop -> {
-                Server oldServer = shop.getServerList().get(linkedServerID - 1);
+                Server oldServer   = shop.find(x -> x.getID() == linkedServerID).get();
+                Customer nextCustomer = oldServer.peekNextCustomer();
                 if (oldServer.hasQueue()) {
                     Server updatedServer = new Server(oldServer.getID(),
                                                       false,
-                                                      false,
+                                                      oldServer.hasWaitingCustomer(),
                                                       oldServer.getAvailableTime(),
-                                                      oldServer.getWaitingCustomer());
+                                                      nextCustomer);
+                    
+                    updatedServer.copyQueue(oldServer);
 
-                    updatedServer.copyQueue(oldServer.getQueue());
-
-                    DoneEvent newDE = new DoneEvent(customer, 
+                    DoneEvent newDE = new DoneEvent(nextCustomer,
                                                     updatedServer.getAvailableTime(),
                                                     linkedServerID);
 
                     return Pair.of(shop.replace(updatedServer), newDE);
                 } else {
+
                     Server updatedServer = new Server(oldServer.getID());
 
                     DoneEvent newDE = new DoneEvent(customer, 
                                                     updatedServer.getAvailableTime(),
                                                     linkedServerID);
                     
-                    updatedServer.copyQueue(oldServer.getQueue());
+                    updatedServer.copyQueue(oldServer);
 
                     return Pair.of(shop.replace(updatedServer), newDE);
                 }

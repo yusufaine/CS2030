@@ -80,7 +80,6 @@ public class Simulator {
                 Pair<Shop,Event> result = pollEvent.execute(updatedShop);
 
                 updatedShop = result.first();
-                eventPQ.offer(result.second());
 
             } else if (pollEvent instanceof ServeEvent) {
                 
@@ -99,6 +98,18 @@ public class Simulator {
                 Pair<Shop,Event> result = pollEvent.execute(updatedShop);
 
                 updatedShop = result.first();
+                
+                Event nextEvent = result.second();
+                int linkedServerID = nextEvent.getLinkedServerID();
+                Server updatedServer = updatedShop.find(x->x.getID() == linkedServerID)
+                                                  .get();
+
+                if (updatedServer.hasQueue()) {
+                    ServeEvent newSE = new ServeEvent(nextEvent.getCustomer(),
+                                                      nextEvent.getEventTime(),
+                                                      nextEvent.getLinkedServerID());
+                    eventPQ.offer(newSE);
+                }
 
             } else if (pollEvent instanceof LeaveEvent) {
                 customersLost++;

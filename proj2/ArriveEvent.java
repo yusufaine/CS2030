@@ -4,6 +4,45 @@ import java.util.Optional;
 
 public class ArriveEvent extends Event {
 
+    ArriveEvent(Customer customer) {
+        super(customer, 
+              customer.getArrivalTime(),
+              shop -> {
+              
+              Optional<Server> availableServer = shop.find(y -> y.isAvailable());
+
+              if (availableServer.isPresent()) {
+                  
+                  Server oldServer   = availableServer.get();
+                  int linkedServerID = oldServer.getID();
+
+                  ServeEvent newSE = new ServeEvent(customer,
+                                                    customer.getArrivalTime(),
+                                                    linkedServerID);
+
+                  return Pair.of(shop, newSE);
+              }
+
+              Optional<Server> noWaitingServer = shop.find(y -> !y.isAvailable() && 
+                                                           !y.hasWaitingCustomer());
+              if (noWaitingServer.isPresent()) {
+                  Server oldServer     = noWaitingServer.get();
+                  int linkedServerID   = oldServer.getID();
+
+                  WaitEvent newWE = new WaitEvent(customer,
+                                                  customer.getArrivalTime(),
+                                                  linkedServerID);
+
+
+                  return Pair.of(shop, newWE);
+              }
+
+              LeaveEvent newLE = new LeaveEvent(customer,
+                                                customer.getArrivalTime());
+              return Pair.of(shop, newLE);
+              });
+    }
+
     ArriveEvent(Customer customer, int maxQueue) {
         super(customer, 
               customer.getArrivalTime(),
@@ -22,7 +61,6 @@ public class ArriveEvent extends Event {
                   return Pair.of(shop, newSE);
               }
 
-              // returns first server that is available and does not have a max q
               Optional<Server> busyServer = shop.find(y -> !y.isAvailable() && 
                                                       y.getQueueSize() != maxQueue);
               if (busyServer.isPresent()) {
@@ -36,11 +74,12 @@ public class ArriveEvent extends Event {
 
 
                   return Pair.of(shop, newWE);
+              } else {
+                  LeaveEvent newLE = new LeaveEvent(customer,
+                                                    customer.getArrivalTime());
+                  return Pair.of(shop, newLE);
               }
 
-              LeaveEvent newLE = new LeaveEvent(customer,
-                                                customer.getArrivalTime());
-              return Pair.of(shop, newLE);
               });
     }
 
