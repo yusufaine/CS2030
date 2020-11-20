@@ -5,82 +5,54 @@ import java.util.Optional;
 public class ArriveEvent extends Event {
 
     ArriveEvent(Customer customer) {
-        super(customer, 
-              customer.getArrivalTime(),
-              shop -> {
-              
-              Optional<Server> availableServer = shop.find(y -> y.isAvailable());
+        super(customer, customer.getArrivalTime(), shop -> {
 
-              if (availableServer.isPresent()) {
-                  
-                  Server oldServer   = availableServer.get();
-                  int linkedServerID = oldServer.getID();
+            Optional<Server> availableServer = shop.find(y -> y.isAvailable());
 
-                  ServeEvent newSE = new ServeEvent(customer,
-                                                    customer.getArrivalTime(),
-                                                    linkedServerID);
+            if (availableServer.isPresent()) {
+                Server oldServer = availableServer.get();
+                int linkedServerID = oldServer.getID();
 
-                  return Pair.of(shop, newSE);
-              }
-
-              Optional<Server> noWaitingServer = shop.find(y -> !y.isAvailable() && 
-                                                           !y.hasWaitingCustomer());
-              if (noWaitingServer.isPresent()) {
-                  Server oldServer     = noWaitingServer.get();
-                  int linkedServerID   = oldServer.getID();
-
-                  WaitEvent newWE = new WaitEvent(customer,
-                                                  customer.getArrivalTime(),
+                ServeEvent newSE = new ServeEvent(customer, 
+                                                  customer.getArrivalTime(), 
                                                   linkedServerID);
 
+                return Pair.of(shop, newSE);
+            } 
 
-                  return Pair.of(shop, newWE);
-              }
+            Optional<Server> busyServer = shop.find(y -> (y.getQueue().size() >= 1) 
+                                                    && (y.getQueue().size() < 
+                                                    y.getMaxQueue()));
 
-              LeaveEvent newLE = new LeaveEvent(customer,
-                                                customer.getArrivalTime());
-              return Pair.of(shop, newLE);
-              });
-    }
+            if (busyServer.isPresent()) {
+                Server oldServer = busyServer.get();
+                int linkedServerID = oldServer.getID();
 
-    ArriveEvent(Customer customer, int maxQueue) {
-        super(customer, 
-              customer.getArrivalTime(),
-              shop -> {
-              
-              Optional<Server> availableServer = shop.find(y -> y.isAvailable());
+                WaitEvent newWE = new WaitEvent(customer,
+                                                customer.getArrivalTime(),
+                                                linkedServerID);
 
-              if (availableServer.isPresent()) {
-                  
-                  int linkedServerID = availableServer.get().getID();
+                return Pair.of(shop, newWE);
+            }
 
-                  ServeEvent newSE = new ServeEvent(customer,
-                                                    customer.getArrivalTime(),
-                                                    linkedServerID);
+            Optional<Server> singleServer = shop.find(y -> !y.hasWaiting());
 
-                  return Pair.of(shop, newSE);
-              }
+            if (singleServer.isPresent()) {
+                Server oldServer = singleServer.get();
+                int linkedServerID = oldServer.getID();
 
-              Optional<Server> busyServer = shop.find(y -> !y.isAvailable() && 
-                                                      y.getQueueSize() != maxQueue);
-              if (busyServer.isPresent()) {
+                WaitEvent newWE = new WaitEvent(customer,
+                                                customer.getArrivalTime(),
+                                                linkedServerID);
 
-                  int linkedServerID       = busyServer.get().getID();
-                  Customer waitingCustomer = customer;
-
-                  WaitEvent newWE = new WaitEvent(waitingCustomer,
-                                                  waitingCustomer.getArrivalTime(),
-                                                  linkedServerID);
+                return Pair.of(shop,newWE);
+            }
 
 
-                  return Pair.of(shop, newWE);
-              } else {
-                  LeaveEvent newLE = new LeaveEvent(customer,
-                                                    customer.getArrivalTime());
-                  return Pair.of(shop, newLE);
-              }
+            LeaveEvent newLE = new LeaveEvent(customer, customer.getArrivalTime());
 
-              });
+            return Pair.of(shop, newLE);
+        });
     }
 
     public String toString() {

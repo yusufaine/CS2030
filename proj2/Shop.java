@@ -15,15 +15,24 @@ public class Shop {
     private final List<Server> serverList;
     private final List<Customer> waitingList = new ArrayList<>();
     private final Map<Server, List<Customer>> serverMap = new HashMap<>();
+    private final int maxQueue;
+
+    Shop(int numOfServer, int maxQueue) {
+        this.numOfServer = numOfServer;
+        this.maxQueue    = maxQueue;
+        this.serverList  = createServerList(numOfServer, maxQueue);
+    }
 
     Shop(int numOfServer) {
         this.numOfServer = numOfServer;
-        this.serverList  = createServerList(numOfServer);
+        this.maxQueue    = 1;
+        this.serverList  = createServerList(numOfServer, maxQueue);
     }
 
     Shop(List<Server> serverList) {
         this.numOfServer = serverList.size();
         this.serverList  = serverList;
+        this.maxQueue    = 1;
     }
 
     public int getNumOfServer() {
@@ -34,13 +43,13 @@ public class Shop {
         return this.serverList;
     }
 
-    public List<Server> createServerList(int numOfServer) {
+    public List<Server> createServerList(int numOfServer, int maxQueue) {
 
         List<Server> tmpList = new ArrayList<>();
 
         IntStream.range(1, numOfServer + 1)
                  .forEach(x -> {
-                    Server tmpServer = new Server(x);
+                    Server tmpServer = new Server(x, maxQueue);
                     tmpList.add(tmpServer);
                  });
 

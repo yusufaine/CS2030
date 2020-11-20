@@ -5,107 +5,76 @@ import java.util.LinkedList;
 
 public class Server {
 
-    private final int serverID;
+    private final int id;
     private final boolean available;
-    private final boolean waitingCustomer;
+    private final boolean hasWaiting;
     private final double availableTime;
-    private final Customer toServe;
+    private final int maxQueue;
     private final Queue<Customer> customerQueue = new LinkedList<>();
 
-    /**
-     * Constructs a new instance of a server.
-     *
-     * @param      id               The id-number of the server
-     * @param      available        Boolean reflecting the availability of the server
-     * @param      waitingCustomer  Boolean representing if there is a waiting customer
-     * @param      availableTime    Reflects when the server would be available
-     * @param      toServe          The customer that it needs to serve after the current
-     */
-    public Server(int id, 
-                  boolean available, 
-                  boolean waitingCustomer, 
-                  double availableTime, 
-                  Customer toServe) {
+    Server(int id, 
+           boolean available, 
+           boolean hasWaiting, 
+           double availableTime,
+           int maxQueue) {
 
-        this.serverID        = id;
-        this.available       = available;
-        this.waitingCustomer = waitingCustomer;
-        this.availableTime   = availableTime;
-        this.toServe         = toServe;
+        this.id = id;
+        this.available = available;
+        this.hasWaiting = hasWaiting;
+        this.availableTime = availableTime;
+        this.maxQueue = maxQueue;
     }
 
-    /**
-     * Constructs a new instance of a server.
-     *
-     * @param      id               The id-number of the server
-     * @param      available        Boolean reflecting the availability of the server
-     * @param      waitingCustomer  Boolean representing if there is a waiting customer
-     * @param      availableTime    Reflects when the server would be available
-     */
-    public Server(int id, 
-                  boolean available, 
-                  boolean waitingCustomer, 
-                  double availableTime) {
-
-        this.serverID        = id;
-        this.available       = available;
-        this.waitingCustomer = waitingCustomer;
-        this.availableTime   = availableTime;
-        this.toServe         = null;
+    Server(int id, boolean available, boolean hasWaiting, double availableTime) {
+        this.id = id;
+        this.available = available;
+        this.hasWaiting = hasWaiting;
+        this.availableTime = availableTime;
+        this.maxQueue = 1;
     }
 
-    /**
-     * Constructs a new instance of a server.
-     *
-     * @param      id               The id-number of the server
-     */
-    public Server(int id) {
-        this.serverID        = id;
-        this.available       = true;
-        this.waitingCustomer = false;
-        this.availableTime   = 0.0;
-        this.toServe         = null;
+    Server(int id, int maxQueue) {
+        this.id = id;
+        this.available = true;
+        this.hasWaiting = false;
+        this.availableTime = 0.0;
+        this.maxQueue = maxQueue;
     }
-
 
     public int getID() {
-        return this.serverID;
+        return this.id;
     }
 
-    public boolean getAvailability() {
+    public boolean isAvailable() {
         return this.available;
     }
 
-    public boolean hasWaitingCustomer() {
-        return this.waitingCustomer;
+    public boolean hasWaiting() {
+        return this.hasWaiting;
     }
 
     public double getAvailableTime() {
         return this.availableTime;
     }
 
-    public Customer getWaitingCustomer() {
-        return this.toServe;
-    }
-
-    public boolean isAvailable() {
-        return this.getAvailability();
+    public int getMaxQueue() {
+        return this.maxQueue;
     }
 
     public Queue<Customer> getQueue() {
         return this.customerQueue;
     }
 
-    public int getQueueSize() {
-        return this.customerQueue.size();
+    public boolean isQueueFull() {
+        return this.customerQueue.size() == maxQueue;
     }
 
-    public boolean hasQueue() {
-        if (this.getQueueSize() == 0) {
-            return false;
-        } else {
-            return true;
-        }
+    public void copyQueue(Server server) {
+        this.customerQueue.addAll(server.getQueue());
+    }
+
+    public void addToQueue(Customer customer) {
+        this.customerQueue.offer(customer);
     }
 
     public Customer peekNextCustomer() {
@@ -116,36 +85,28 @@ public class Server {
         return this.customerQueue.poll();
     }
 
-    public void addToQueue(Customer customer) {
-
-        this.customerQueue.offer(customer);
+    public boolean hasQueue() {
+        if (this.customerQueue.size() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public void copyQueue(Server oldServer) {
-        
-        this.customerQueue.addAll(oldServer.getQueue());
-
-    }
-
-    /**
-     * Returns a string representation of the Server object.
-     *
-     * @return     String that states whether the server is available, when is it next
-     *             available, or if it has a customer waiting on it.
-     */
     @Override
     public String toString() {
-        if (this.getAvailability() == true) {
+        if (this.isAvailable()) {
             return String.format("%d is available", 
-                                 this.serverID);
+                                 this.id);
         } else {
-            if (this.hasWaitingCustomer() == false) {
-                return String.format("%d is busy; available at %.3f", 
-                                     this.serverID, 
+            if (this.hasWaiting()) {
+                return String.format("%d is busy; " + 
+                                     "waiting customer to be served at %.3f", 
+                                     this.id, 
                                      this.availableTime);
             } else {
-                return String.format("%d is busy; waiting customer to be served at %.3f", 
-                                     this.serverID, 
+                return String.format("%d is busy; available at %.3f", 
+                                     this.id, 
                                      this.availableTime);
             }
         }
@@ -168,13 +129,3 @@ public class Server {
         return this.getID();
     }
 }
-
-
-
-
-
-
-
-
-
-

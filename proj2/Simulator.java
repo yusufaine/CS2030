@@ -6,26 +6,30 @@ import java.util.PriorityQueue;
 import java.util.stream.IntStream;
 import java.util.function.Supplier;
 
+import cs2030.simulator.RNGImpl;
 
 public class Simulator {
     private final ArrayList<Customer> customerList;
     private final PriorityQueue<Event> eventPQ;
     private final PriorityQueue<Event> printPQ;
     private final Shop shop;
+    private final RNGImpl rng;
     private final Supplier<Double> serviceTime;
-    private final int maxQueue;
+    private final double restProb;
 
     public Simulator(ArrayList<Double> customerArrivals, 
                      int serverCount, 
-                     Supplier<Double> serviceTime,
-                     int maxQueue) {
+                     RNGImpl rng,
+                     int maxQueue,
+                     double restProb) {
 
+        this.serviceTime  = () -> rng.genServiceTime();
         this.customerList = createCustomerList(customerArrivals, serviceTime);
         this.eventPQ      = new PriorityQueue<>(new EventComparator());
         this.printPQ      = new PriorityQueue<>(new EventComparator());
-        this.shop         = new Shop(serverCount);
-        this.serviceTime  = serviceTime;
-        this.maxQueue     = maxQueue;
+        this.shop         = new Shop(serverCount, maxQueue);
+        this.rng          = rng;
+        this.restProb     = restProb;
     }
 
     public ArrayList<Customer> createCustomerList(ArrayList<Double> customerArrivals,
@@ -47,7 +51,7 @@ public class Simulator {
 
     public void populateEventPQ() {
         for (Customer customer : customerList) {
-            ArriveEvent arriveEvent = new ArriveEvent(customer, this.maxQueue);
+            ArriveEvent arriveEvent = new ArriveEvent(customer);
             eventPQ.offer(arriveEvent);
         }
     }
@@ -98,13 +102,22 @@ public class Simulator {
                 Pair<Shop,Event> result = pollEvent.execute(updatedShop);
 
                 updatedShop = result.first();
-                
+
                 Event nextEvent = result.second();
                 int linkedServerID = nextEvent.getLinkedServerID();
-                Server updatedServer = updatedShop.find(x->x.getID() == linkedServerID)
-                                                  .get();
+                Server updatedServer = updatedShop.find(x->x.getID() == linkedServerID).get();
 
-                if (updatedServer.hasQueue()) {
+                if (this.rng.genRandomRest() < this.restProb) {
+                    double restTime = this.rng.genRestPeriod();
+                    ServerRestEvent newSRE = new ServerRestEvent(
+                                                    nextEvent.getCustomer(),
+                                                    nextEvent.getEventTime(),
+                                                    nextEvent.getLinkedServerID(),
+                                                    restTime);
+                    eventPQ.offer(newSRE);
+
+                } else if (updatedServer.hasQueue()) {
+
                     ServeEvent newSE = new ServeEvent(nextEvent.getCustomer(),
                                                       nextEvent.getEventTime(),
                                                       nextEvent.getLinkedServerID());
@@ -112,7 +125,35 @@ public class Simulator {
                 }
 
             } else if (pollEvent instanceof LeaveEvent) {
+                
                 customersLost++;
+            
+            } else if (pollEvent instanceof ServerRestEvent) {
+                printPQ.remove(pollEvent);
+
+                Pair<Shop,Event> result = pollEvent.execute(updatedShop);
+                
+                updatedShop = result.first();
+                eventPQ.offer(result.second());
+
+            } else if (pollEvent instanceof ServerBackEvent) {
+                
+                printPQ.remove(pollEvent);
+
+                Pair<Shop,Event> result = pollEvent.execute(updatedShop);
+
+                updatedShop = result.first();
+
+                Event nextEvent = result.second();
+                int linkedServerID = nextEvent.getLinkedServerID();
+                Server updatedServer = updatedShop.find(x->x.getID() == linkedServerID).get();
+
+                if (updatedServer.hasQueue()) {
+                    ServeEvent newSE = new ServeEvent(nextEvent.getCustomer(),
+                                                      nextEvent.getEventTime(),
+                                                      nextEvent.getLinkedServerID());
+                    eventPQ.offer(newSE);
+                }
             }
         }
         printEvents(printPQ);
@@ -139,4 +180,5 @@ public class Simulator {
                                          served,
                                          lost));
     }
+
 }

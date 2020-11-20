@@ -35,6 +35,10 @@ public abstract class Event {
         return this.customer;
     }
 
+    public int getCustomerID() {
+        return this.customer.getID();
+    }
+
     public double getEventTime() {
         return this.eventTime;
     }

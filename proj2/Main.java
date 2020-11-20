@@ -1,6 +1,5 @@
 import cs2030.simulator.Simulator;
 import cs2030.simulator.RNGImpl;
-import cs2030.simulator.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,24 +17,40 @@ public class Main {
         int customerCount;
         double lambda;
         double mu;
+        double rho;
+        double restProb;
 
         if (args.length == 5) {
-            seed        = Integer.parseInt(args[0]);
-            serverCount = Integer.parseInt(args[1]);
-            maxQueue    = 1;
+            seed          = Integer.parseInt(args[0]);
+            serverCount   = Integer.parseInt(args[1]);
+            maxQueue      = 1;
             customerCount = Integer.parseInt(args[2]);
-            lambda      = Double.parseDouble(args[3]);
-            mu          = Double.parseDouble(args[4]);
-        } else {
-            seed        = Integer.parseInt(args[0]);
-            serverCount = Integer.parseInt(args[1]);
-            maxQueue    = Integer.parseInt(args[2]);
+            lambda        = Double.parseDouble(args[3]);
+            mu            = Double.parseDouble(args[4]);
+            rho           = 0;
+            restProb      = 0;
+
+        } else if (args.length == 6) {
+            seed          = Integer.parseInt(args[0]);
+            serverCount   = Integer.parseInt(args[1]);
+            maxQueue      = Integer.parseInt(args[2]);
             customerCount = Integer.parseInt(args[3]);
-            lambda      = Double.parseDouble(args[4]);
-            mu          = Double.parseDouble(args[5]);
+            lambda        = Double.parseDouble(args[4]);
+            mu            = Double.parseDouble(args[5]);
+            rho           = 0;
+            restProb      = 0;
+        } else {
+            seed          = Integer.parseInt(args[0]);
+            serverCount   = Integer.parseInt(args[1]);
+            maxQueue      = Integer.parseInt(args[2]);
+            customerCount = Integer.parseInt(args[3]);
+            lambda        = Double.parseDouble(args[4]);
+            mu            = Double.parseDouble(args[5]);
+            rho           = Double.parseDouble(args[6]);
+            restProb      = Double.parseDouble(args[7]);
         }
 
-        RNGImpl rng = new RNGImpl(seed, lambda, mu, 0);
+        RNGImpl rng = new RNGImpl(seed, lambda, mu, rho);
 
         ArrayList<Double> customerArrivals = new ArrayList<>();
 
@@ -51,12 +66,11 @@ public class Main {
                     }
                  });
 
-        Supplier<Double> serviceTime = () -> rng.genServiceTime();
-
         Simulator sim = new Simulator(customerArrivals, 
-                                      serverCount, 
-                                      serviceTime, 
-                                      maxQueue);
+                                      serverCount,
+                                      rng,
+                                      maxQueue,
+                                      restProb);
         sim.run();
     }
 }
