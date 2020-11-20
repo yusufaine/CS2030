@@ -28,6 +28,8 @@ public class DoneEvent extends Event {
                                                   oldServer.getAvailableTime(),
                                                   oldServer.getMaxQueue());
 
+                updatedServer.copyQueue(oldServer);
+
                 DoneEvent newDE = new DoneEvent(customer, 
                                                 updatedServer.getAvailableTime(), 
                                                 linkedServerID);

@@ -14,7 +14,7 @@ public class ServerBackEvent extends Event {
             restedServer.copyQueue(oldServer);
 
             ServerBackEvent newSBE = new ServerBackEvent(
-                                         customer,
+                                         restedServer.peekNextCustomer(),
                                          restedServer.getAvailableTime(),
                                          linkedServerID);
 
