@@ -16,39 +16,70 @@ public class Simulator {
     private final RNGImpl rng;
     private final Supplier<Double> serviceTime;
     private final double restProb;
+    private final double greedyProb;
 
+    /**
+     * Constructs a new instance of the Simulator.
+     *
+     * @param      customerArrivals  List of customer arrival times
+     * @param      serverCount       Number of servers
+     * @param      rng               The random number generator
+     * @param      maxQueue          The maximum queue of the servers
+     * @param      restProb          The resting probability
+     * @param      selfCheckCount    The number of self-checkouts
+     * @param      greedyProb        The greedy probability
+     */
     public Simulator(ArrayList<Double> customerArrivals, 
                      int serverCount, 
                      RNGImpl rng,
                      int maxQueue,
-                     double restProb) {
+                     double restProb,
+                     int selfCheckCount,
+                     double greedyProb) {
 
+        this.rng          = rng;
         this.serviceTime  = () -> rng.genServiceTime();
-        this.customerList = createCustomerList(customerArrivals, serviceTime);
+        this.customerList = createCustomerList(customerArrivals, 
+                                               serviceTime,
+                                               greedyProb);
         this.eventPQ      = new PriorityQueue<>(new EventComparator());
         this.printPQ      = new PriorityQueue<>(new EventComparator());
-        this.shop         = new Shop(serverCount, maxQueue);
-        this.rng          = rng;
+        this.shop         = new Shop(serverCount, maxQueue, selfCheckCount);
         this.restProb     = restProb;
+        this.greedyProb   = greedyProb;
     }
 
+    /**
+     * Creates a customer list using the list of arrival times.
+     *
+     * @param      customerArrivals  The customer arrivals
+     * @param      serviceTime       The service time of the customers
+     * @param      greedyProb        Used to determine if customer is greedy
+     *
+     * @return     List of customers that will be used in populateEventPQ();
+     */
     public ArrayList<Customer> createCustomerList(ArrayList<Double> customerArrivals,
-                                                  Supplier<Double> serviceTime) {
-
+                                                  Supplier<Double> serviceTime,
+                                                  double greedyProb) {
         ArrayList<Customer> tmpList = new ArrayList<>();
 
         IntStream.range(1, customerArrivals.size() + 1)
-                 .forEach(x -> {
-                    Customer tmpCustomer = new Customer(x, 
-                                                        customerArrivals.get(x - 1),
-                                                        serviceTime);
-                    tmpList.add(tmpCustomer);
+                 .forEach(customerID -> {
+                     boolean isGreedy = this.rng.genCustomerType() < greedyProb;
+                     tmpList.add(new Customer(customerID, 
+                                              customerArrivals.get(customerID - 1), 
+                                              serviceTime,
+                                              isGreedy));
                  });
 
         return tmpList;
     }
 
-
+    /**
+     * Initialises the simulator with the necessary arrive events based on the 
+     * customerList created earlier.
+     * 
+     */
     public void populateEventPQ() {
         for (Customer customer : customerList) {
             ArriveEvent arriveEvent = new ArriveEvent(customer);
@@ -56,6 +87,9 @@ public class Simulator {
         }
     }
 
+    /**
+     * Runs the simulation based on events in EventPQ.
+     */
     public void run() {
         int totalCustomer    = 0;
         int customersLost    = 0;
@@ -104,23 +138,32 @@ public class Simulator {
                 updatedShop = result.first();
 
                 Event nextEvent = result.second();
-                int linkedServerID = nextEvent.getLinkedServerID();
-                Server updatedServer = updatedShop.find(x->x.getID() == linkedServerID).get();
+                int linkedServerID = nextEvent.getLinkedServer().getID();
+                Server updatedServer = updatedShop.find(x -> x.getID() == linkedServerID).get();
 
-                if (this.rng.genRandomRest() < this.restProb) {
-                    double restTime = this.rng.genRestPeriod();
-                    ServerRestEvent newSRE = new ServerRestEvent(
+                if (nextEvent.getLinkedServer().isHuman()) {
+                    if (this.rng.genRandomRest() < this.restProb) {
+                        double restTime = this.rng.genRestPeriod();
+                        ServerRestEvent newSRE = new ServerRestEvent(
                                                     nextEvent.getCustomer(),
                                                     nextEvent.getEventTime(),
-                                                    nextEvent.getLinkedServerID(),
+                                                    nextEvent.getLinkedServer(),
                                                     restTime);
-                    eventPQ.offer(newSRE);
+                        eventPQ.offer(newSRE);
+                        
+                    } else if (updatedServer.hasQueue()) {
 
+                        ServeEvent newSE = new ServeEvent(nextEvent.getCustomer(),
+                                                          nextEvent.getEventTime(),
+                                                          nextEvent.getLinkedServer());
+                        eventPQ.offer(newSE);
+                        
+                    }
                 } else if (updatedServer.hasQueue()) {
 
                     ServeEvent newSE = new ServeEvent(nextEvent.getCustomer(),
                                                       nextEvent.getEventTime(),
-                                                      nextEvent.getLinkedServerID());
+                                                      nextEvent.getLinkedServer());
                     eventPQ.offer(newSE);
                 }
 
@@ -145,13 +188,13 @@ public class Simulator {
                 updatedShop = result.first();
 
                 Event nextEvent = result.second();
-                int linkedServerID = nextEvent.getLinkedServerID();
-                Server updatedServer = updatedShop.find(x->x.getID() == linkedServerID).get();
+                int linkedServerID = nextEvent.getLinkedServer().getID();
+                Server updatedServer = updatedShop.find(x -> x.getID() == linkedServerID).get();
 
                 if (updatedServer.hasQueue()) {
                     ServeEvent newSE = new ServeEvent(nextEvent.getCustomer(),
                                                       nextEvent.getEventTime(),
-                                                      nextEvent.getLinkedServerID());
+                                                      nextEvent.getLinkedServer());
                     eventPQ.offer(newSE);
                 }
             }
@@ -160,12 +203,24 @@ public class Simulator {
         printStats(totalWaitTime, customersServed, customersLost);
     }
 
+    /**
+     * Prints the events of the Simulator.
+     *
+     * @param      printPQ  Queue of events sorted chronologically
+     */
     public void printEvents(PriorityQueue<Event> printPQ) {
         for (Event e : printPQ) {
             System.out.println(e);
         }
     }
 
+    /**
+     * Prints statistics of the simulation.
+     *
+     * @param      totalTime  The total time customers waited
+     * @param      served     The customers served
+     * @param      lost       The customers lost
+     */
     public void printStats(double totalTime, int served, int lost) {
 
         double averageTime = 0;
@@ -180,5 +235,4 @@ public class Simulator {
                                          served,
                                          lost));
     }
-
 }

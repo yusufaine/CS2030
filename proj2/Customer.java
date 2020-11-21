@@ -9,25 +9,53 @@ public class Customer {
     private final Supplier<Double> serviceTime;
     private double computedServiceTime;
     private boolean isComputed = false;
+    private final boolean isGreedy;
 
     /**
      * Constructs a new instance of a customer.
      *
-     * @param      id    Identifier of the customer.
-     * @param      time  Which the customer arrives.
+     * @param      id           The identifier of the customer
+     * @param      arrivalTime  The arrival time of the custoemr
+     * @param      serviceTime  The time needed to service the customer
+     * @param      isGreedy     Indicates if the customer is greedy
      */
+    public Customer(int id, 
+                    double arrivalTime, 
+                    Supplier<Double> serviceTime, 
+                    boolean isGreedy) {
 
+        this.customerID  = id;
+        this.arrivalTime = arrivalTime;
+        this.serviceTime = serviceTime;
+        this.isGreedy    = isGreedy;
+    }
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param      id           The identifier of the customer
+     * @param      arrivalTime  The arrival time of the custoemr
+     * @param      serviceTime  The time needed to service the customer
+     */
     public Customer(int id, double arrivalTime, Supplier<Double> serviceTime) {
         this.customerID  = id;
         this.arrivalTime = arrivalTime;
         this.serviceTime = serviceTime;
+        this.isGreedy    = false;
     }
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param      id           The identifier of the customer
+     * @param      arrivalTime  The arrival time of the custoemr
+     */
     public Customer(int id, double arrivalTime) {
         this.customerID  = id;
         this.arrivalTime = arrivalTime;
         Supplier<Double> defaultTime = () -> 1.0;
         this.serviceTime = defaultTime;
+        this.isGreedy    = false;
     }
 
     public int getID() {
@@ -38,6 +66,11 @@ public class Customer {
         return this.arrivalTime;
     }
 
+    /**
+     * Gets the service time of the customer.
+     *
+     * @return     The service time of the customer.
+     */
     public double getServiceTime() {
         
         if (this.isComputed == false) {
@@ -45,6 +78,10 @@ public class Customer {
             this.computedServiceTime = this.serviceTime.get();
         }
         return this.computedServiceTime;
+    }
+
+    public boolean isGreedy() {
+        return this.isGreedy;
     }
 
     /**

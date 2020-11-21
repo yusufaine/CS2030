@@ -22,7 +22,7 @@ public class Pair<T,U> {
         return this.second;
     }
 
-    public String toString(){
+    public String toString() {
         return String.format("Pair value: {%s, %s}", this.first(), this.second());
     }
 }

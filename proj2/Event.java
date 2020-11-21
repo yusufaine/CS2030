@@ -7,18 +7,18 @@ public abstract class Event {
 
     private final Customer customer;
     private final double eventTime;
-    private final int linkedServerID;
+    private final Server linkedServer;
     private final Function<Shop, Pair<Shop,Event>> execFunc;
 
     Event(Customer customer,
           double eventTime,
-          int linkedServerID,
+          Server linkedServer,
           Function<Shop, Pair<Shop,Event>> execFunc) {
         
-        this.customer    = customer;
-        this.eventTime   = eventTime;
-        this.execFunc    = execFunc;
-        this.linkedServerID = linkedServerID;
+        this.customer     = customer;
+        this.eventTime    = eventTime;
+        this.execFunc     = execFunc;
+        this.linkedServer = linkedServer;
     }
 
     Event(Customer customer,
@@ -28,7 +28,7 @@ public abstract class Event {
         this.customer    = customer;
         this.eventTime   = eventTime;
         this.execFunc    = execFunc;
-        this.linkedServerID = -1;
+        this.linkedServer = null;
     }
 
     public Customer getCustomer() {
@@ -43,8 +43,8 @@ public abstract class Event {
         return this.eventTime;
     }
 
-    public int getLinkedServerID() {
-        return this.linkedServerID;
+    public Server getLinkedServer() {
+        return this.linkedServer;
     }
 
     public final Pair<Shop, Event> execute(Shop shop) {
